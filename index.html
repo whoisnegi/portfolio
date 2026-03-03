@@ -7,31 +7,19 @@
         (function () {
             var errorQueue = [];
             var pirschReady = false;
-            var maxErrors = 5; // Limit errors per page to avoid spam
+            var maxErrors = 5;
             var errorCount = 0;
 
             function reportToPirsch(errorData) {
-                // Don't report more than maxErrors per page load
                 if (errorCount >= maxErrors) return;
                 errorCount++;
-
-                // Build location string
                 var location = errorData.filename || '';
                 if (errorData.lineno) {
                     location += ':' + errorData.lineno;
-                    if (errorData.colno) {
-                        location += ':' + errorData.colno;
-                    }
+                    if (errorData.colno) location += ':' + errorData.colno;
                 }
-
-                // Truncate stack trace to fit Pirsch metadata limits (2000 chars max)
                 var stack = errorData.stack || '';
-                if (stack.length > 1500) {
-                    stack = stack.substring(0, 1500) + '... (truncated)';
-                }
-
-                // Send to Pirsch as a custom event
-                // Using non_interactive: true so errors don't affect bounce rate
+                if (stack.length > 1500) stack = stack.substring(0, 1500) + '... (truncated)';
                 try {
                     pirsch('Runtime Error', {
                         meta: {
@@ -44,24 +32,19 @@
                         non_interactive: true
                     });
                 } catch (e) {
-                    // Pirsch not available, silently ignore
                     console.error('[Runtime Error]', errorData.message);
                 }
             }
 
             function flushQueue() {
-                while (errorQueue.length > 0) {
-                    reportToPirsch(errorQueue.shift());
-                }
+                while (errorQueue.length > 0) reportToPirsch(errorQueue.shift());
             }
 
             function handleError(errorData) {
-                // Check if pirsch function is available
                 if (typeof pirsch === 'function') {
                     pirschReady = true;
                     reportToPirsch(errorData);
                 } else {
-                    // Queue for later when Pirsch loads
                     errorQueue.push(errorData);
                 }
             }
@@ -86,8 +69,6 @@
                 });
             });
 
-            // Try to flush queue when Pirsch becomes available
-            // Check periodically for a short time after page load
             var checkCount = 0;
             var checkInterval = setInterval(function () {
                 checkCount++;
@@ -96,12 +77,10 @@
                     flushQueue();
                     clearInterval(checkInterval);
                 } else if (checkCount >= 20) {
-                    // Stop checking after ~10 seconds
                     clearInterval(checkInterval);
                 }
             }, 500);
 
-            // Also check when DOM is ready
             document.addEventListener('DOMContentLoaded', function () {
                 setTimeout(function () {
                     if (typeof pirsch === 'function') {
@@ -113,61 +92,35 @@
         })();
     </script>
 
-    <!-- ══════════════════════════════════════════════════════════════
-         META & SEO
-         ══════════════════════════════════════════════════════════════ -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Karan Negi" />
     <meta property="og:title" content="Karan Negi | Backend Software Engineer" />
-    <meta property="og:description"
-        content="Portfolio of Karan Negi, a specialist in backend engineering, scalable systems, and API design." />
-
-
-    <meta property="og:image"
-        content="https://res.cloudinary.com/du5fldub3/image/upload/c_fill,w_1200,h_630,g_north/app/6146e259-32c4-44b6-9c03-21bcdac14929/screenshots/preview-image.png" />
+    <meta property="og:description" content="Portfolio of Karan Negi, a specialist in backend engineering, scalable systems, and API design." />
+    <meta property="og:image" content="https://res.cloudinary.com/du5fldub3/image/upload/c_fill,w_1200,h_630,g_north/app/6146e259-32c4-44b6-9c03-21bcdac14929/screenshots/preview-image.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-
-    <!-- Open Graph video (may be ignored by many platforms, but valid) -->
-    <meta property="og:video"
-        content="https://res.cloudinary.com/du5fldub3/video/upload/w_1200/app/6146e259-32c4-44b6-9c03-21bcdac14929/videos/desktop/preview-video.mp4" />
+    <meta property="og:image:alt" content="Karan Negi Portfolio" />
+    <meta property="og:video" content="https://res.cloudinary.com/du5fldub3/video/upload/w_1200/app/6146e259-32c4-44b6-9c03-21bcdac14929/videos/desktop/preview-video.mp4" />
     <meta property="og:video:type" content="video/mp4" />
     <meta property="og:video:width" content="1280" />
     <meta property="og:video:height" content="720" />
-
-    <!-- X Player Card -->
     <meta name="twitter:card" content="player" />
-    <meta name="twitter:image"
-        content="https://res.cloudinary.com/du5fldub3/image/upload/c_fill,w_1200,h_630,g_north/app/6146e259-32c4-44b6-9c03-21bcdac14929/screenshots/preview-image.png" />
-
-    <!-- This must be an iframe-friendly HTML page you host -->
+    <meta name="twitter:image" content="https://res.cloudinary.com/du5fldub3/image/upload/c_fill,w_1200,h_630,g_north/app/6146e259-32c4-44b6-9c03-21bcdac14929/screenshots/preview-image.png" />
     <meta name="twitter:player" content="https://karan-negi.kite.space/embed/preview" />
     <meta name="twitter:player:width" content="1280" />
     <meta name="twitter:player:height" content="720" />
-
-    <!-- Raw stream URL (MP4) -->
-    <meta name="twitter:player:stream"
-        content="https://res.cloudinary.com/du5fldub3/video/upload/w_1200/app/6146e259-32c4-44b6-9c03-21bcdac14929/videos/desktop/preview-video.mp4" />
+    <meta name="twitter:player:stream" content="https://res.cloudinary.com/du5fldub3/video/upload/w_1200/app/6146e259-32c4-44b6-9c03-21bcdac14929/videos/desktop/preview-video.mp4" />
     <meta name="twitter:player:stream:content_type" content="video/mp4" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Karan Negi Portfolio Logo" />
 
     <title>Karan Negi | Backend Software Engineer</title>
 
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Unbounded:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Unbounded:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
-
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com/3.4.17"></script>
     <script>
         tailwind.config = {
@@ -202,7 +155,6 @@
         }
     </script>
     <style>
-        /* BASE_STYLES */
         body {
             background-color: #000000;
             color: #FFFFFF;
@@ -210,16 +162,10 @@
             overflow-x: hidden;
         }
 
-        h1,
-        h2,
-        h3,
-        h4,
-        h5,
-        h6 {
+        h1, h2, h3, h4, h5, h6 {
             font-family: 'Unbounded', sans-serif;
         }
 
-        /* COMPONENT_STYLES */
         .diagonal-hero {
             transform: rotate(-4deg);
             transform-origin: center;
@@ -249,33 +195,11 @@
             filter: brightness(1.1);
         }
 
-        .icon-circle {
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-        }
-
-        .card-surface {
-            background-color: #111111;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 16px;
-        }
-
-        /* NAV LOGO VISIBILITY */
-        #nav-logo {
-            transition: opacity 0.3s ease;
-        }
-
-        /* In this design, logo is always visible because bg is black */
-        /* Overriding default template behavior for this specific dark theme design */
         #navbar {
             background-color: rgba(0, 0, 0, 0.8);
             backdrop-filter: blur(8px);
         }
 
-        /* SCROLL REVEAL */
         .reveal {
             opacity: 0;
             transform: translateY(30px);
@@ -287,159 +211,47 @@
             transform: translateY(0);
         }
 
-        /* UTILITIES */
-        .text-balance {
-            text-wrap: balance;
-        }
-
-        /* Hide scrollbar for clean look */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #000;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #333;
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #FF3E00;
-        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #FF3E00; }
     </style>
-    <link rel="icon" href="https://res.cloudinary.com/du5fldub3/image/upload/v1769585012/zlslkmvlqa7h5xyamhjy.svg"
-        type="image/svg+xml">
+    <link rel="icon" href="https://res.cloudinary.com/du5fldub3/image/upload/v1769585012/zlslkmvlqa7h5xyamhjy.svg" type="image/svg+xml">
     <link rel="canonical" href="https://karan-negi.kite.space/">
     <meta property="og:url" content="https://karan-negi.kite.space/">
     <script type="module" crossorigin src="/assets/main-BEgcv791.js"></script>
     <script defer src="https://api.pirsch.io/pa.js" id="pianjs" data-code="bQ2Og18HPqc4bhgVidQC5wZWrQdFBB7y"></script>
 
-    <style id="kite-badge-style">
-        #kite-badge {
-            position: fixed;
-            bottom: calc(16px + env(safe-area-inset-bottom, 0px));
-            right: calc(16px + env(safe-area-inset-right, 0px));
-            z-index: 2147483647;
-            display: flex;
-            align-items: center;
-            padding: 4px;
-            background: #ffffff;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            padding-right: 8px;
-            transition: padding 0.2s ease;
-        }
-
-        #kite-badge:hover {
-            padding-right: 4px;
-        }
-
-        #kite-badge a {
-            display: inline-flex;
-            align-items: center;
-            gap: 2px;
-            text-decoration: none;
-            color: #374151;
-            font-size: 13px;
-            font-weight: 500;
-            line-height: 1;
-            outline: none;
-        }
-
-        #kite-badge a:focus-visible {
-            text-decoration: underline;
-        }
-
-        #kite-badge-dismiss {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 0;
-            height: 20px;
-            padding: 0;
-            overflow: hidden;
-            margin-left: 0;
-            background: transparent;
-            border: none;
-            border-radius: 4px;
-            color: #9ca3af;
-            cursor: pointer;
-            opacity: 0;
-            pointer-events: none;
-            transition: width 0.2s ease, margin-left 0.2s ease, opacity 0.2s ease, color 0.2s ease, background-color 0.2s ease;
-        }
-
-        #kite-badge:hover #kite-badge-dismiss,
-        #kite-badge:focus-within #kite-badge-dismiss {
-            opacity: 1;
-            pointer-events: auto;
-            width: 20px;
-            margin-left: 2px;
-        }
-
-        #kite-badge-dismiss:hover {
-            color: #374151;
-            background-color: #f3f4f6;
-        }
-
-        #kite-badge-dismiss:focus-visible {
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
-            color: #374151;
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            #kite-badge-dismiss {
-                transition: none;
-            }
-        }
-    </style>
 </head>
 
 <body class="antialiased selection:bg-accent selection:text-white">
-    <!-- ══════════════════════════════════════════════════════════════
-         LAYOUT STRUCTURE
-         ══════════════════════════════════════════════════════════════ -->
 
     <!-- NAVIGATION -->
     <nav class="fixed top-0 left-0 right-0 z-50 border-b border-white/10 transition-all duration-300" id="navbar">
         <div class="max-w-[1280px] mx-auto px-6 h-20 flex items-center justify-between">
-            <!-- Logo -->
-            <a href="/" id="nav-logo" class="flex items-center gap-3 group z-50" onclick="handleNav(event, '/')">
-                <!-- Using logo_url from spec -->
-                <img src="https://res.cloudinary.com/du5fldub3/image/upload/h_40,c_scale/v1772540898/app/6146e259-32c4-44b6-9c03-21bcdac14929/iter3/logo-iter3.png"
-                    alt="Karan Negi Logo" class="h-10 w-auto object-contain" />
+            <a href="#home" class="flex items-center gap-3 group z-50" onclick="scrollToSection(event, 'home')">
+                <img src="https://res.cloudinary.com/du5fldub3/image/upload/h_140,c_scale/v1772540898/app/6146e259-32c4-44b6-9c03-21bcdac14929/iter3/logo-iter3.png"
+                    alt="Karan Negi Logo" class="h-24 w-auto object-contain" />
             </a>
 
             <!-- Desktop Menu -->
             <div class="hidden md:flex items-center gap-8">
-                <a href="/" onclick="handleNav(event, '/')"
-                    class="text-sm font-body font-medium text-white hover:text-accent transition-colors"
-                    data-nav>Home</a>
-                <a href="/work" onclick="handleNav(event, '/work')"
-                    class="text-sm font-body font-medium text-white hover:text-accent transition-colors"
-                    data-nav>Work</a>
-                <a href="/about" onclick="handleNav(event, '/about')"
-                    class="text-sm font-body font-medium text-white hover:text-accent transition-colors"
-                    data-nav>About</a>
-                <a href="/contact" onclick="handleNav(event, '/contact')"
-                    class="text-sm font-body font-medium text-white hover:text-accent transition-colors"
-                    data-nav>Contact</a>
-
-                <a href="/contact" onclick="handleNav(event, '/contact')"
+                <a href="#home" onclick="scrollToSection(event, 'home')"
+                    class="text-sm font-body font-medium text-white hover:text-accent transition-colors nav-link" data-section="home">Home</a>
+                <a href="#skills" onclick="scrollToSection(event, 'skills')"
+                    class="text-sm font-body font-medium text-white hover:text-accent transition-colors nav-link" data-section="skills">Skills</a>
+                <a href="#career" onclick="scrollToSection(event, 'career')"
+                    class="text-sm font-body font-medium text-white hover:text-accent transition-colors nav-link" data-section="career">Career</a>
+                <a href="#contact" onclick="scrollToSection(event, 'contact')"
+                    class="text-sm font-body font-medium text-white hover:text-accent transition-colors nav-link" data-section="contact">Contact</a>
+                <a href="#contact" onclick="scrollToSection(event, 'contact')"
                     class="px-5 py-2 rounded-full border border-white/20 text-sm hover:bg-accent hover:border-accent hover:text-white transition-all duration-300">
                     Hire Me
                 </a>
             </div>
 
             <!-- Mobile Menu Trigger -->
-            <button id="mobile-menu-btn" class="md:hidden p-2 text-white focus:outline-none z-50 relative"
-                aria-label="Menu">
+            <button id="mobile-menu-btn" class="md:hidden p-2 text-white focus:outline-none z-50 relative" aria-label="Menu">
                 <i data-lucide="menu" class="w-6 h-6"></i>
             </button>
         </div>
@@ -455,35 +267,264 @@
             </button>
         </div>
         <div class="flex-1 flex flex-col justify-center items-center gap-8 p-6">
-            <a href="/" onclick="handleNav(event, '/')"
+            <a href="#home" onclick="scrollToSection(event, 'home')"
                 class="text-4xl font-display font-bold text-white hover:text-accent hover:italic transition-all">Home</a>
-            <a href="/work" onclick="handleNav(event, '/work')"
-                class="text-4xl font-display font-bold text-white hover:text-accent hover:italic transition-all">Work</a>
-            <a href="/about" onclick="handleNav(event, '/about')"
-                class="text-4xl font-display font-bold text-white hover:text-accent hover:italic transition-all">About</a>
-            <a href="/contact" onclick="handleNav(event, '/contact')"
+            <a href="#skills" onclick="scrollToSection(event, 'skills')"
+                class="text-4xl font-display font-bold text-white hover:text-accent hover:italic transition-all">Skills</a>
+            <a href="#career" onclick="scrollToSection(event, 'career')"
+                class="text-4xl font-display font-bold text-white hover:text-accent hover:italic transition-all">Career</a>
+            <a href="#contact" onclick="scrollToSection(event, 'contact')"
                 class="text-4xl font-display font-bold text-white hover:text-accent hover:italic transition-all">Contact</a>
+            <a href="#contact" onclick="scrollToSection(event, 'contact')"
+                class="text-4xl font-display font-bold text-accent hover:italic transition-all">Hire Me</a>
         </div>
         <div class="p-8 border-t border-white/10 flex justify-center gap-6">
-            <a href="#" class="text-muted hover:text-accent transition-colors"><i data-lucide="github"
-                    class="w-6 h-6"></i></a>
-            <a href="#" class="text-muted hover:text-accent transition-colors"><i data-lucide="linkedin"
-                    class="w-6 h-6"></i></a>
-            <a href="#" class="text-muted hover:text-accent transition-colors"><i data-lucide="twitter"
-                    class="w-6 h-6"></i></a>
+            <a href="https://github.com/whoisnegi" target="_blank" rel="noopener noreferrer" class="text-muted hover:text-accent transition-colors"><i data-lucide="github" class="w-6 h-6"></i></a>
+            <a href="https://www.linkedin.com/in/whoisnegi" target="_blank" rel="noopener noreferrer" class="text-muted hover:text-accent transition-colors"><i data-lucide="linkedin" class="w-6 h-6"></i></a>
+            <a href="mailto:cse.negi@gmail.com" class="text-muted hover:text-accent transition-colors"><i data-lucide="mail" class="w-6 h-6"></i></a>
         </div>
     </div>
 
-    <main id="app" class="pt-20 min-h-screen">
-        <!-- Route content is appended dynamically -->
+    <main>
+
+        <!-- ══════════════════════════════════
+             HOME
+             ══════════════════════════════════ -->
+        <section id="home" class="relative min-h-screen flex items-center justify-center overflow-hidden px-6 pt-20 pb-20">
+            <div class="hidden md:block absolute top-32 left-8 text-xs font-mono text-muted tracking-widest uppercase">
+                Backend<br>Architect
+            </div>
+            <div class="hidden md:block absolute top-32 right-8 text-xs font-mono text-muted tracking-widest uppercase text-right">
+                Est.<br>2015
+            </div>
+            <div class="hidden md:flex absolute bottom-12 left-8 gap-4">
+                <a href="https://github.com/whoisnegi" target="_blank" rel="noopener noreferrer" class="text-muted hover:text-accent transition-colors"><i data-lucide="github" class="w-5 h-5"></i></a>
+                <a href="https://www.linkedin.com/in/whoisnegi" target="_blank" rel="noopener noreferrer" class="text-muted hover:text-accent transition-colors"><i data-lucide="linkedin" class="w-5 h-5"></i></a>
+            </div>
+            <div class="hidden md:block absolute bottom-12 right-8 animate-bounce text-muted">
+                <i data-lucide="arrow-down" class="w-5 h-5"></i>
+            </div>
+
+            <div class="max-w-[1280px] w-full text-center relative z-10">
+                <div class="inline-block mb-6 px-4 py-1 rounded-full border border-accent/50 text-accent text-sm font-medium tracking-wide reveal">
+                    SOFTWARE ARCHITECT
+                </div>
+                <h1 class="text-[3.5rem] md:text-[6rem] lg:text-[7.5rem] font-display font-bold leading-[0.9] md:leading-[0.85] tracking-tight mb-8 diagonal-hero mix-blend-screen reveal" style="transition-delay: 100ms">
+                    ARCHITECTING<br>THE INVISIBLE.
+                </h1>
+                <p class="text-lg md:text-xl text-muted max-w-2xl mx-auto mb-10 leading-relaxed reveal" style="transition-delay: 200ms">
+                    I engineer the systems that quietly hold everything together.
+                    Reliability at scale, clarity in design, zero shortcuts in production.
+                </p>
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4 reveal" style="transition-delay: 300ms">
+                    <a href="#skills" onclick="scrollToSection(event, 'skills')" class="btn-pill">
+                        View the Stack <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </a>
+                    <span class="text-sm text-muted">Based in Delhi, India — working globally.</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ══════════════════════════════════
+             SKILLS
+             ══════════════════════════════════ -->
+        <section id="skills" class="py-24 px-6 relative overflow-hidden border-t border-white/10">
+            <div class="absolute inset-0 z-0 opacity-20">
+                <img src="https://res.cloudinary.com/du5fldub3/image/upload/w_1200,q_auto,f_auto/app/6146e259-32c4-44b6-9c03-21bcdac14929/iter3/stack_texture_abstract.png"
+                    class="w-full h-full object-cover grayscale" alt="Texture">
+            </div>
+
+            <div class="max-w-[1280px] mx-auto relative z-10">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                    <div class="lg:col-span-5 reveal">
+                        <h2 class="text-4xl md:text-5xl font-display font-bold mb-8">THE<br>TECHNICAL<br>STACK.</h2>
+
+                    </div>
+                    <div class="lg:col-span-7 grid grid-cols-1 md:grid-cols-2 gap-6 reveal">
+                        <div class="bg-surface p-8 rounded-2xl border border-white/10 hover:border-accent/50 transition-colors">
+                            <div class="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center mb-6 text-accent">
+                                <i data-lucide="code-2" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="text-xl font-display font-bold mb-4">Languages</h3>
+                            <p class="text-muted">JavaScript, Python, SQL, C, C++, HTML, CSS</p>
+                        </div>
+                        <div class="bg-surface p-8 rounded-2xl border border-white/10 hover:border-accent/50 transition-colors">
+                            <div class="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center mb-6 text-accent">
+                                <i data-lucide="layers" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="text-xl font-display font-bold mb-4">Frameworks</h3>
+                            <p class="text-muted">NodeJS, Express, Loopback, React, Redux</p>
+                        </div>
+                        <div class="bg-surface p-8 rounded-2xl border border-white/10 hover:border-accent/50 transition-colors">
+                            <div class="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center mb-6 text-accent">
+                                <i data-lucide="database" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="text-xl font-display font-bold mb-4">Data</h3>
+                            <p class="text-muted">Oracle, MySQL, Elasticsearch, Kibana, Redis, MongoDB, Firebase</p>
+                        </div>
+                        <div class="bg-surface p-8 rounded-2xl border border-white/10 hover:border-accent/50 transition-colors">
+                            <div class="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center mb-6 text-accent">
+                                <i data-lucide="server" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="text-xl font-display font-bold mb-4">Infrastructure</h3>
+                            <p class="text-muted">AWS, Kubernetes, Jenkins CI/CD, Nginx</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ══════════════════════════════════
+             CAREER
+             ══════════════════════════════════ -->
+        <section id="career">
+            <!-- Career Timeline -->
+            <div class="py-24 px-6 bg-surface border-t border-white/10">
+                <div class="max-w-[1000px] mx-auto">
+                    <h2 class="text-4xl font-display font-bold mb-16 text-center reveal">CAREER TIMELINE</h2>
+
+                    <div class="space-y-12 relative before:content-[''] before:absolute before:left-[15px] md:before:left-1/2 before:top-0 before:bottom-0 before:w-px before:bg-white/10">
+                        <!-- Item 1 -->
+                        <div class="relative flex flex-col md:flex-row gap-8 items-start reveal">
+                            <div class="md:w-1/2 md:text-right md:pr-12 pt-2 pl-12 md:pl-0">
+                                <h3 class="text-xl font-bold text-white">SSDE — Backend Engineering</h3>
+                                <p class="text-accent font-mono text-sm mb-2">Valuefy Technologies (Nov 2020 – Present)</p>
+                                <p class="text-muted">Technical Lead on the HDFC-Wealthfy platform. Led design and development of scalable wealth management backend systems serving multiple domestic and international banks. Improved system performance by 50%, reduced errors by 80%, and cut Elasticsearch peak load by 90%.</p>
+                                <p class="text-white/40 text-xs font-mono mt-2">NodeJS · Loopback · Oracle · ElasticSearch · Redis · AWS · K8s · Jenkins</p>
+                            </div>
+                            <div class="absolute left-[9px] md:left-1/2 md:-ml-[6px] w-3 h-3 rounded-full bg-accent mt-3"></div>
+                            <div class="md:w-1/2 md:pl-12 hidden md:block"></div>
+                        </div>
+
+                        <!-- Item 2 -->
+                        <div class="relative flex flex-col md:flex-row gap-8 items-start reveal">
+                            <div class="md:w-1/2 md:text-right md:pr-12 hidden md:block"></div>
+                            <div class="absolute left-[9px] md:left-1/2 md:-ml-[6px] w-3 h-3 rounded-full bg-surface border border-accent mt-3"></div>
+                            <div class="md:w-1/2 md:pl-12 pt-2 pl-12 md:pl-0">
+                                <h3 class="text-xl font-bold text-white">Software Engineer Intern</h3>
+                                <p class="text-accent font-mono text-sm mb-2">I-Plexus Technologies (Apr 2020 – Sep 2020)</p>
+                                <p class="text-muted">Developed the backend of an E-Commerce application, building CRUD APIs and a diff-check algorithm to detect user detail modifications.</p>
+                                <p class="text-white/40 text-xs font-mono mt-2">NodeJS · Express · MongoDB · React</p>
+                            </div>
+                        </div>
+
+                        <!-- Item 3 -->
+                        <div class="relative flex flex-col md:flex-row gap-8 items-start reveal">
+                            <div class="md:w-1/2 md:text-right md:pr-12 pt-2 pl-12 md:pl-0">
+                                <h3 class="text-xl font-bold text-white">B.Tech — Computer Science Engineering</h3>
+                                <p class="text-accent font-mono text-sm mb-2">Kurukshetra University (Aug 2015 – Jun 2019)</p>
+                                <p class="text-muted">Graduated with a degree in Computer Science Engineering. Built a strong foundation in data structures, algorithms, operating systems, and distributed computing.</p>
+                            </div>
+                            <div class="absolute left-[9px] md:left-1/2 md:-ml-[6px] w-3 h-3 rounded-full bg-surface border border-white/30 mt-3"></div>
+                            <div class="md:w-1/2 md:pl-12 hidden md:block"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Beyond the Code -->
+            <div class="py-24 px-6 border-t border-white/10">
+                <div class="max-w-[1280px] mx-auto">
+                    <div class="flex flex-col md:flex-row gap-12 items-center reveal">
+                        <div class="md:w-1/3">
+                            <h2 class="text-4xl font-display font-bold mb-4">BEYOND<br>THE CODE.</h2>
+                            <div class="h-1 w-20 bg-accent mb-8"></div>
+                        </div>
+                        <div class="md:w-2/3 grid grid-cols-1 sm:grid-cols-2 gap-8">
+                            <div class="p-6 border border-white/10 rounded-xl bg-surface/50">
+                                <i data-lucide="users" class="w-8 h-8 text-accent mb-4"></i>
+                                <h3 class="text-xl font-bold mb-2">Leadership & Mentoring</h3>
+                                <p class="text-muted">Led a team of 10 engineers at Valuefy, providing technical and functional mentorship. Helped the team build confidence, take ownership, and leverage AI tools for productivity and innovation.</p>
+                            </div>
+                            <div class="p-6 border border-white/10 rounded-xl bg-surface/50">
+                                <i data-lucide="mic" class="w-8 h-8 text-accent mb-4"></i>
+                                <h3 class="text-xl font-bold mb-2">Ownership & Delivery</h3>
+                                <p class="text-muted">Demonstrated full ownership of fintech projects — contributing to technical strategy, fostering best practices in code review, and ensuring seamless integration of new features into production.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ══════════════════════════════════
+             CONTACT
+             ══════════════════════════════════ -->
+        <section id="contact" class="py-24 px-6 border-t border-white/10">
+            <div class="max-w-[1280px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16">
+                <div class="reveal">
+                    <h2 class="text-4xl md:text-5xl font-display font-bold mb-8">START A<br>CONVERSATION.</h2>
+                    <p class="text-xl text-muted mb-12">
+                        Whether it's a new project or a technical challenge, I'm ready to listen.
+                    </p>
+
+                    <div class="mb-12">
+                        <h3 class="text-white font-bold mb-6">Other Channels</h3>
+                        <div class="flex flex-col gap-4">
+                            <a href="mailto:cse.negi@gmail.com" class="flex items-center gap-3 text-muted hover:text-accent transition-colors">
+                                <div class="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center">
+                                    <i data-lucide="mail" class="w-5 h-5"></i>
+                                </div>
+                                cse.negi@gmail.com
+                            </a>
+                            <a href="https://www.linkedin.com/in/whoisnegi" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 text-muted hover:text-accent transition-colors">
+                                <div class="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center">
+                                    <i data-lucide="linkedin" class="w-5 h-5"></i>
+                                </div>
+                                LinkedIn Profile
+                            </a>
+                            <a href="https://github.com/whoisnegi" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 text-muted hover:text-accent transition-colors">
+                                <div class="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center">
+                                    <i data-lucide="github" class="w-5 h-5"></i>
+                                </div>
+                                GitHub Profile
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="aspect-video w-full rounded-2xl overflow-hidden border border-white/10 grayscale invert">
+                        <iframe
+                            src="https://www.google.com/maps?q=New+Delhi,+India&output=embed"
+                            width="100%"
+                            height="100%"
+                            style="border:0;"
+                            allowfullscreen=""
+                            loading="lazy">
+                        </iframe>
+                    </div>
+                </div>
+
+                <div class="bg-surface p-8 md:p-12 rounded-3xl border border-white/10 reveal">
+                    <h3 class="text-2xl font-display font-bold mb-8">Send a Message</h3>
+                    <form id="contact-form" class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-muted mb-2">Full Name</label>
+                            <input type="text" name="name" required placeholder="John Doe" class="w-full bg-black border border-white/20 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-accent transition-colors">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-muted mb-2">Email Address</label>
+                            <input type="email" name="email" required placeholder="john@example.com" class="w-full bg-black border border-white/20 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-accent transition-colors">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-muted mb-2">Message</label>
+                            <textarea name="message" required rows="6" placeholder="Tell me about your project..." class="w-full bg-black border border-white/20 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-accent transition-colors"></textarea>
+                        </div>
+                        <button type="submit" class="w-full btn-pill justify-center text-lg">
+                            Send Message
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <!-- FOOTER -->
     <footer class="bg-bg border-t border-white/10 py-16">
         <div class="max-w-[1280px] mx-auto px-6">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16">
                 <div class="col-span-1 md:col-span-2">
-                    <a href="/" onclick="handleNav(event, '/')" class="block mb-6">
+                    <a href="#home" onclick="scrollToSection(event, 'home')" class="block mb-6">
                         <img src="https://res.cloudinary.com/du5fldub3/image/upload/h_40,c_scale/v1772540898/app/6146e259-32c4-44b6-9c03-21bcdac14929/iter3/logo-iter3.png"
                             alt="Logo" class="h-8 w-auto">
                     </a>
@@ -494,26 +535,12 @@
                 </div>
 
                 <div>
-                    <h4 class="text-white font-display font-semibold mb-6">Sitemap</h4>
+                    <h4 class="text-white font-display font-semibold mb-6">Navigation</h4>
                     <ul class="space-y-4">
-                        <li><a href="/" onclick="handleNav(event, '/')"
-                                class="text-muted hover:text-accent transition-colors">Home</a></li>
-                        <li><a href="/work" onclick="handleNav(event, '/work')"
-                                class="text-muted hover:text-accent transition-colors">Work</a></li>
-                        <li><a href="/about" onclick="handleNav(event, '/about')"
-                                class="text-muted hover:text-accent transition-colors">About</a></li>
-                        <li><a href="/contact" onclick="handleNav(event, '/contact')"
-                                class="text-muted hover:text-accent transition-colors">Contact</a></li>
-                    </ul>
-                </div>
-
-                <div>
-                    <h4 class="text-white font-display font-semibold mb-6">Legal</h4>
-                    <ul class="space-y-4">
-                        <li><a href="/privacy-policy" onclick="handleNav(event, '/privacy-policy')"
-                                class="text-muted hover:text-accent transition-colors">Privacy Policy</a></li>
-                        <li><a href="/terms-of-service" onclick="handleNav(event, '/terms-of-service')"
-                                class="text-muted hover:text-accent transition-colors">Terms of Service</a></li>
+                        <li><a href="#home" onclick="scrollToSection(event, 'home')" class="text-muted hover:text-accent transition-colors">Home</a></li>
+                        <li><a href="#skills" onclick="scrollToSection(event, 'skills')" class="text-muted hover:text-accent transition-colors">Skills</a></li>
+                        <li><a href="#career" onclick="scrollToSection(event, 'career')" class="text-muted hover:text-accent transition-colors">Career</a></li>
+                        <li><a href="#contact" onclick="scrollToSection(event, 'contact')" class="text-muted hover:text-accent transition-colors">Contact</a></li>
                     </ul>
                 </div>
             </div>
@@ -523,15 +550,15 @@
                     &copy; <span id="current-year"></span> Karan Negi. All rights reserved.
                 </p>
                 <div class="flex gap-4">
-                    <a href="https://github.com" target="_blank" rel="noopener noreferrer"
+                    <a href="https://github.com/whoisnegi" target="_blank" rel="noopener noreferrer"
                         class="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center text-white hover:bg-accent hover:border-accent transition-all">
                         <i data-lucide="github" class="w-5 h-5"></i>
                     </a>
-                    <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer"
+                    <a href="https://www.linkedin.com/in/whoisnegi" target="_blank" rel="noopener noreferrer"
                         class="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center text-white hover:bg-accent hover:border-accent transition-all">
                         <i data-lucide="linkedin" class="w-5 h-5"></i>
                     </a>
-                    <a href="mailto:hello@karannegi.dev"
+                    <a href="mailto:cse.negi@gmail.com"
                         class="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center text-white hover:bg-accent hover:border-accent transition-all">
                         <i data-lucide="mail" class="w-5 h-5"></i>
                     </a>
@@ -540,111 +567,21 @@
         </div>
     </footer>
 
-    <!-- ══════════════════════════════════════════════════════════════
-         DATA & ROUTING
-         ══════════════════════════════════════════════════════════════ -->
-    <script id="content" type="application/json">{
-  "company": {
-    "name": "Karan Negi",
-    "role": "Backend Software Engineer",
-    "description": "I build high-concurrency backend systems that power high-stakes digital products.",
-    "email": "hello@karannegi.dev",
-    "location": "New Delhi, India"
-  },
-  "projects": [
-    {
-      "id": "p1",
-      "title": "Real-time Bidding Engine",
-      "subtitle": "High Concurrency System",
-      "description": "Handled 50k+ requests per second with sub-10ms latency using Go and Redis.",
-      "tech": [
-        "Go",
-        "Redis",
-        "gRPC"
-      ],
-      "imageAssetId": "project_high_concurrency",
-      "link": "#"
-    },
-    {
-      "id": "p2",
-      "title": "Fintech Data Migration",
-      "subtitle": "Legacy Modernization",
-      "description": "Zero-downtime migration of 10TB of legacy data to a microservices architecture.",
-      "tech": [
-        "Python",
-        "PostgreSQL",
-        "Kafka"
-      ],
-      "imageAssetId": "project_data_migration",
-      "link": "#"
-    },
-    {
-      "id": "p3",
-      "title": "Distributed Task Queue",
-      "subtitle": "System Design",
-      "description": "A high-throughput task processing system with automatic retries and dead-letter queues.",
-      "tech": [
-        "Python",
-        "Redis",
-        "Docker"
-      ],
-      "imageAssetId": "project_grid_item_1",
-      "link": "https://github.com"
-    }
-  ],
-  "testimonials": [
-    {
-      "quote": "Karan doesn't just write code; he builds foundations. Our system latency dropped by 40% after his architectural refactor.",
-      "author": "Sarah Jenkins",
-      "role": "CTO at NexaFlow",
-      "avatarAssetId": "testimonial_avatar_1"
-    }
-  ],
-  "assets": {
-    "project_high_concurrency": "https://res.cloudinary.com/du5fldub3/image/upload/app/6146e259-32c4-44b6-9c03-21bcdac14929/iter3/project_high_concurrency.png",
-    "project_data_migration": "https://res.cloudinary.com/du5fldub3/image/upload/app/6146e259-32c4-44b6-9c03-21bcdac14929/iter3/project_data_migration.png",
-    "stack_texture_abstract": "https://res.cloudinary.com/du5fldub3/image/upload/app/6146e259-32c4-44b6-9c03-21bcdac14929/iter3/stack_texture_abstract.png",
-    "testimonial_avatar_1": "https://res.cloudinary.com/du5fldub3/image/upload/app/6146e259-32c4-44b6-9c03-21bcdac14929/iter3/testimonial_avatar_1.png",
-    "project_grid_item_1": "https://res.cloudinary.com/du5fldub3/image/upload/app/6146e259-32c4-44b6-9c03-21bcdac14929/iter3/project_grid_item_1.png",
-    "case_study_diagram": "https://res.cloudinary.com/du5fldub3/image/upload/app/6146e259-32c4-44b6-9c03-21bcdac14929/iter3/case_study_diagram.png",
-    "karan_portrait_main": "https://res.cloudinary.com/du5fldub3/image/upload/app/6146e259-32c4-44b6-9c03-21bcdac14929/iter3/karan_portrait_main.png"
-  }
-}</script>
-
-
-    <script id="main_script">
-        // Receive async-loaded core utilities via CustomEvent (non-blocking)
+    <script>
+        // Async-loaded contact form utility
         let submitContactForm = null;
         document.addEventListener('kite:core-ready', (e) => {
             submitContactForm = e.detail.submitContactForm;
         });
-        const data = JSON.parse(document.getElementById('content').textContent);
-        const app = document.getElementById('app');
 
-        // Helper for Cloudinary Optimization
-        function getOptimizedImageUrl(url, width = 800) {
-            if (!url || !url.includes('cloudinary.com')) return url;
-            // Insert w_{width},q_auto,f_auto
-            return url.replace('/upload/', `/upload/w_${width},q_auto,f_auto/`);
-        }
-
-        // ─── ROUTER ───────────────────────────────────────────────────
-        const routes = {
-            '/': { title: 'Home', render: renderHome },
-            '/work': { title: 'Work', render: renderWork },
-            '/about': { title: 'About', render: renderAbout },
-            '/contact': { title: 'Contact', render: renderContact },
-            '/privacy-policy': { title: 'Privacy Policy', render: renderPrivacy },
-            '/terms-of-service': { title: 'Terms of Service', render: renderTerms },
-        };
-
-        const siteName = data.company.name;
-
-        function handleNav(e, path) {
+        // Smooth scroll to section
+        function scrollToSection(e, sectionId) {
             e.preventDefault();
-            if (path === location.pathname) return;
-            history.pushState({}, '', path);
-            render(path);
+            const el = document.getElementById(sectionId);
+            if (!el) return;
+            const navHeight = document.getElementById('navbar').offsetHeight;
+            const top = el.getBoundingClientRect().top + window.scrollY - navHeight;
+            window.scrollTo({ top, behavior: 'smooth' });
 
             // Close mobile menu if open
             const mobileMenu = document.getElementById('mobile-menu');
@@ -652,16 +589,31 @@
                 mobileMenu.classList.add('translate-x-full');
             }
         }
+        window.scrollToSection = scrollToSection;
 
-        function render(path) {
-            const route = routes[path] || routes['/'];
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+            document.getElementById('mobile-menu').classList.remove('translate-x-full');
+        });
+        document.getElementById('close-mobile-menu').addEventListener('click', () => {
+            document.getElementById('mobile-menu').classList.add('translate-x-full');
+        });
 
-            document.title = `${route.title} | ${siteName}`;
+        // Active nav link on scroll
+        const sections = ['home', 'skills', 'career', 'contact'];
+        const navLinks = document.querySelectorAll('.nav-link');
 
-            // Update Nav Active State
-            document.querySelectorAll('[data-nav]').forEach(link => {
-                const isActive = link.getAttribute('href') === path;
-                if (isActive) {
+        function updateActiveNav() {
+            const navHeight = document.getElementById('navbar').offsetHeight;
+            let current = 'home';
+            sections.forEach(id => {
+                const el = document.getElementById(id);
+                if (el && el.getBoundingClientRect().top <= navHeight + 40) {
+                    current = id;
+                }
+            });
+            navLinks.forEach(link => {
+                if (link.dataset.section === current) {
                     link.classList.add('text-accent');
                     link.classList.remove('text-white');
                 } else {
@@ -669,557 +621,55 @@
                     link.classList.add('text-white');
                 }
             });
-
-            window.scrollTo({ top: 0, behavior: 'instant' });
-            route.render();
-
-            // Post-render initialization
-            if (window.lucide) window.lucide.createIcons();
-            initScrollReveal();
         }
 
-        // Event listeners
-        addEventListener('popstate', () => render(location.pathname));
-        window.handleNav = handleNav;
+        window.addEventListener('scroll', updateActiveNav, { passive: true });
 
-        // Update copyright year
-        document.getElementById('current-year').textContent = new Date().getFullYear();
+        // Scroll reveal
+        const revealObserver = new IntersectionObserver(
+            entries => entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('active');
+            }),
+            { threshold: 0.1 }
+        );
+        document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
-        // --- SCROLL REVEAL ---
-        function initScrollReveal() {
-            const observer = new IntersectionObserver(
-                entries => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            entry.target.classList.add('active');
-                        }
-                    });
-                },
-                { threshold: 0.1 }
-            );
-
-            document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-        }
-
-        // Mobile Menu Logic
-        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-        const closeMobileMenuBtn = document.getElementById('close-mobile-menu');
-        const mobileMenu = document.getElementById('mobile-menu');
-
-        mobileMenuBtn.addEventListener('click', () => {
-            mobileMenu.classList.remove('translate-x-full');
-        });
-        closeMobileMenuBtn.addEventListener('click', () => {
-            mobileMenu.classList.add('translate-x-full');
-        });
-
-        // ─── PAGE RENDERERS ───────────────────────────────────────
-
-        function renderHome() {
-            app.innerHTML = `
-          <!-- HERO SECTION -->
-          <section class="relative min-h-screen flex items-center justify-center overflow-hidden px-6 pt-20 pb-20">
-            <!-- Corner Anchors (Desktop) -->
-            <div class="hidden md:block absolute top-32 left-8 text-xs font-mono text-muted tracking-widest uppercase">
-              Backend<br>Architect
-            </div>
-            <div class="hidden md:block absolute top-32 right-8 text-xs font-mono text-muted tracking-widest uppercase text-right">
-              Est.<br>2024
-            </div>
-            <div class="hidden md:block absolute bottom-12 left-8 flex gap-4">
-              <a href="#" class="text-muted hover:text-accent transition-colors"><i data-lucide="github" class="w-5 h-5"></i></a>
-              <a href="#" class="text-muted hover:text-accent transition-colors"><i data-lucide="linkedin" class="w-5 h-5"></i></a>
-            </div>
-            <div class="hidden md:block absolute bottom-12 right-8 animate-bounce text-muted">
-              <i data-lucide="arrow-down" class="w-5 h-5"></i>
-            </div>
-
-            <div class="max-w-[1280px] w-full text-center relative z-10">
-              <div class="inline-block mb-6 px-4 py-1 rounded-full border border-accent/50 text-accent text-sm font-medium tracking-wide reveal">
-                SOFTWARE ARCHITECT
-              </div>
-              <h1 class="text-[3.5rem] md:text-[6rem] lg:text-[7.5rem] font-display font-bold leading-[0.9] md:leading-[0.85] tracking-tight mb-8 diagonal-hero mix-blend-screen reveal" style="transition-delay: 100ms">
-                ARCHITECTING<br>THE INVISIBLE.
-              </h1>
-              <p class="text-lg md:text-xl text-muted max-w-2xl mx-auto mb-10 leading-relaxed reveal" style="transition-delay: 200ms">
-                I build high-concurrency backend systems that power high-stakes digital products. Scalable, robust, and engineered for speed.
-              </p>
-              <div class="flex flex-col sm:flex-row items-center justify-center gap-4 reveal" style="transition-delay: 300ms">
-                <a href="/work" onclick="handleNav(event, '/work')" class="btn-pill">
-                  View the Architecture <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                </a>
-                <span class="text-sm text-muted">Based in New Delhi, working globally.</span>
-              </div>
-            </div>
-          </section>
-
-          <!-- WORK HIGHLIGHTS -->
-          <section class="py-24 px-6 bg-surface border-t border-white/10">
-            <div class="max-w-[1280px] mx-auto">
-              <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-6 reveal">
-                <div>
-                  <span class="text-accent font-mono text-sm uppercase tracking-wider mb-2 block">Selected Systems</span>
-                  <h2 class="text-4xl md:text-6xl font-display font-bold">ENGINEERED<br>FOR SCALE.</h2>
-                </div>
-                <p class="text-muted max-w-md text-right md:text-left">
-                  A look into the infrastructure and logic behind high-performance applications.
-                </p>
-              </div>
-
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
-                ${data.projects.slice(0, 2).map((project, index) => `
-                  <div class="group cursor-pointer reveal" style="transition-delay: ${index * 100}ms">
-                    <div class="aspect-[4/3] w-full overflow-hidden rounded-2xl mb-6 bg-black border border-white/10 relative">
-                      <img 
-                        src="${getOptimizedImageUrl(data.assets[project.imageAssetId], 800)}" 
-                        alt="${project.title}" 
-                        class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90 group-hover:opacity-100 grayscale group-hover:grayscale-0"
-                      >
-                      <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-60"></div>
-                      <div class="absolute bottom-6 left-6 right-6 flex justify-between items-end">
-                         <span class="bg-accent text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">
-                           ${project.tech[0]}
-                         </span>
-                      </div>
-                    </div>
-                    <h3 class="text-2xl font-display font-bold mb-2 group-hover:text-accent transition-colors">${project.title}</h3>
-                    <p class="text-muted mb-4">${project.description}</p>
-                    <div class="flex gap-2 flex-wrap">
-                      ${project.tech.map(t => `<span class="text-xs text-white/60 border border-white/10 px-2 py-1 rounded">${t}</span>`).join('')}
-                    </div>
-                  </div>
-                `).join('')}
-              </div>
-              
-              <div class="mt-16 text-center reveal">
-                <a href="/work" onclick="handleNav(event, '/work')" class="inline-flex items-center gap-2 text-white hover:text-accent font-medium border-b border-white hover:border-accent pb-1 transition-all">
-                  View All Projects <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                </a>
-              </div>
-            </div>
-          </section>
-
-          <!-- SKILLS / STACK -->
-          <section class="py-24 px-6 relative overflow-hidden">
-            <!-- Background Texture -->
-            <div class="absolute inset-0 z-0 opacity-20">
-               <img src="${getOptimizedImageUrl(data.assets.stack_texture_abstract, 1200)}" class="w-full h-full object-cover grayscale" alt="Texture">
-            </div>
-            
-            <div class="max-w-[1280px] mx-auto relative z-10">
-              <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-                <div class="lg:col-span-5 reveal">
-                  <h2 class="text-4xl md:text-5xl font-display font-bold mb-8">THE<br>TECHNICAL<br>STACK.</h2>
-                  <p class="text-muted text-lg mb-8">
-                    My toolkit is selected for reliability and performance. I prioritize tools that offer control, scalability, and strong typing.
-                  </p>
-                  <a href="/about" onclick="handleNav(event, '/about')" class="btn-pill">
-                    More About Me
-                  </a>
-                </div>
-                <div class="lg:col-span-7 grid grid-cols-1 md:grid-cols-2 gap-6 reveal">
-                  <div class="bg-surface p-8 rounded-2xl border border-white/10 hover:border-accent/50 transition-colors">
-                    <div class="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center mb-6 text-accent">
-                      <i data-lucide="code-2" class="w-6 h-6"></i>
-                    </div>
-                    <h3 class="text-xl font-display font-bold mb-4">Languages</h3>
-                    <p class="text-muted">Go, Python, Java, Rust</p>
-                  </div>
-                  <div class="bg-surface p-8 rounded-2xl border border-white/10 hover:border-accent/50 transition-colors">
-                     <div class="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center mb-6 text-accent">
-                      <i data-lucide="server" class="w-6 h-6"></i>
-                    </div>
-                    <h3 class="text-xl font-display font-bold mb-4">Infrastructure</h3>
-                    <p class="text-muted">AWS, Kubernetes, Terraform</p>
-                  </div>
-                  <div class="bg-surface p-8 rounded-2xl border border-white/10 hover:border-accent/50 transition-colors">
-                     <div class="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center mb-6 text-accent">
-                      <i data-lucide="database" class="w-6 h-6"></i>
-                    </div>
-                    <h3 class="text-xl font-display font-bold mb-4">Data</h3>
-                    <p class="text-muted">PostgreSQL, Redis, Kafka, ElasticSearch</p>
-                  </div>
-                  <div class="bg-surface p-8 rounded-2xl border border-white/10 hover:border-accent/50 transition-colors">
-                     <div class="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center mb-6 text-accent">
-                      <i data-lucide="workflow" class="w-6 h-6"></i>
-                    </div>
-                    <h3 class="text-xl font-display font-bold mb-4">Architecture</h3>
-                    <p class="text-muted">Microservices, Event-Driven, REST/gRPC</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <!-- TESTIMONIALS -->
-          <section class="py-24 px-6 bg-surface border-y border-white/10">
-            <div class="max-w-[1000px] mx-auto text-center">
-              <span class="text-accent font-mono text-sm uppercase tracking-wider mb-6 block reveal">Peer Review</span>
-              <h2 class="text-3xl md:text-5xl font-display font-bold leading-tight mb-12 reveal">
-                "${data.testimonials[0].quote}"
-              </h2>
-              <div class="flex flex-col items-center gap-4 reveal">
-                <img 
-                  src="${getOptimizedImageUrl(data.assets[data.testimonials[0].avatarAssetId], 200)}" 
-                  alt="${data.testimonials[0].author}" 
-                  class="w-16 h-16 rounded-full object-cover border-2 border-accent"
-                >
-                <div class="text-center">
-                  <h4 class="text-lg font-bold text-white">${data.testimonials[0].author}</h4>
-                  <p class="text-muted text-sm">${data.testimonials[0].role}</p>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <!-- CTA -->
-          <section class="py-32 px-6">
-            <div class="max-w-[1280px] mx-auto text-center">
-              <h2 class="text-5xl md:text-8xl font-display font-bold mb-8 diagonal-hero reveal">
-                LET'S BUILD<br>THE FUTURE.
-              </h2>
-              <p class="text-xl text-muted mb-10 max-w-2xl mx-auto reveal">
-                Available for technical consulting and senior backend roles.
-              </p>
-              <div class="reveal">
-                <a href="/contact" onclick="handleNav(event, '/contact')" class="btn-pill text-lg px-10 py-4">
-                  Initiate Contact
-                </a>
-              </div>
-            </div>
-          </section>
-        `;
-        }
-
-        function renderWork() {
-            app.innerHTML = `
-          <!-- WORK HERO -->
-          <section class="pt-40 pb-20 px-6 border-b border-white/10">
-            <div class="max-w-[1280px] mx-auto">
-              <h1 class="text-5xl md:text-7xl font-display font-bold mb-6 reveal">SYSTEMS<br>THAT WORK.</h1>
-              <p class="text-xl text-muted max-w-2xl reveal">
-                Clean code is a prerequisite. Scalable architecture is the goal. Here is a selection of my engineering work.
-              </p>
-            </div>
-          </section>
-
-          <!-- PROJECTS GRID -->
-          <section class="py-20 px-6">
-            <div class="max-w-[1280px] mx-auto">
-              <div class="grid grid-cols-1 gap-24">
-                ${data.projects.map((project, index) => `
-                  <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center reveal">
-                    <div class="order-2 ${index % 2 === 1 ? 'lg:order-1' : 'lg:order-2'}">
-                      <div class="aspect-[4/3] rounded-2xl overflow-hidden bg-surface border border-white/10 relative group">
-                        <img 
-                          src="${getOptimizedImageUrl(data.assets[project.imageAssetId], 1000)}" 
-                          alt="${project.title}" 
-                          class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
-                        >
-                      </div>
-                    </div>
-                    <div class="order-1 ${index % 2 === 1 ? 'lg:order-2' : 'lg:order-1'}">
-                      <div class="flex gap-2 mb-4">
-                        ${project.tech.map(t => `<span class="text-xs font-mono text-accent border border-accent/30 px-2 py-1 rounded bg-accent/10">${t}</span>`).join('')}
-                      </div>
-                      <h2 class="text-3xl md:text-4xl font-display font-bold mb-2">${project.title}</h2>
-                      <h3 class="text-lg text-white/80 font-medium mb-6">${project.subtitle}</h3>
-                      <p class="text-muted text-lg mb-8 leading-relaxed">
-                        ${project.description}
-                      </p>
-                      <a href="${project.link}" target="_blank" class="inline-flex items-center gap-2 text-white hover:text-accent font-medium border-b border-white hover:border-accent pb-1 transition-all">
-                        View Details <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
-                      </a>
-                    </div>
-                  </div>
-                `).join('')}
-              </div>
-            </div>
-          </section>
-
-          <!-- CASE STUDY TEASER -->
-          <section class="py-24 px-6 bg-surface border-t border-white/10">
-            <div class="max-w-[1280px] mx-auto">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
-                <div class="reveal">
-                  <span class="text-accent font-mono text-sm uppercase tracking-wider mb-2 block">Deep Dive 01</span>
-                  <h2 class="text-4xl md:text-5xl font-display font-bold mb-6">THE 100ms<br>CHALLENGE.</h2>
-                  <p class="text-muted text-lg mb-8">
-                    How we reduced API response times across 12 microservices by optimizing the database layer and implementing a global caching strategy.
-                  </p>
-                  <div class="p-6 border border-white/10 rounded-xl inline-block">
-                    <span class="block text-3xl font-display font-bold text-white mb-1">65%</span>
-                    <span class="text-sm text-muted">Reduction in CPU Usage</span>
-                  </div>
-                </div>
-                <div class="reveal">
-                  <div class="aspect-video rounded-2xl overflow-hidden border border-white/10">
-                    <img src="${getOptimizedImageUrl(data.assets.case_study_diagram, 800)}" class="w-full h-full object-cover" alt="Case Study Diagram">
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-        `;
-        }
-
-        function renderAbout() {
-            app.innerHTML = `
-          <!-- ABOUT HERO -->
-          <section class="pt-40 pb-20 px-6">
-            <div class="max-w-[1280px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-              <div class="reveal">
-                <div class="aspect-[3/4] rounded-2xl overflow-hidden max-w-md mx-auto lg:mx-0 border border-white/10">
-                  <img src="${getOptimizedImageUrl(data.assets.karan_portrait_main, 800)}" class="w-full h-full object-cover grayscale" alt="Karan Negi">
-                </div>
-              </div>
-              <div class="reveal">
-                <h1 class="text-5xl md:text-7xl font-display font-bold mb-8 leading-tight">LOGIC<br>OVER NOISE.</h1>
-                <p class="text-xl text-white font-medium mb-6">
-                  I believe in building software that is as elegant in its logic as it is powerful in its performance.
-                </p>
-                <p class="text-muted text-lg leading-relaxed mb-8">
-                  Starting with a curiosity for how data moves across the wire, I've spent the last decade deep in the server-side. From monoliths to microservices, I've seen how architectural choices dictate business success.
-                </p>
-                <div class="flex gap-4">
-                  <a href="/contact" onclick="handleNav(event, '/contact')" class="btn-pill">
-                    Get in Touch
-                  </a>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <!-- EXPERIENCE TIMELINE -->
-          <section class="py-24 px-6 bg-surface border-t border-white/10">
-            <div class="max-w-[1000px] mx-auto">
-              <h2 class="text-4xl font-display font-bold mb-16 text-center reveal">CAREER TIMELINE</h2>
-              
-              <div class="space-y-12 relative before:content-[''] before:absolute before:left-[15px] md:before:left-1/2 before:top-0 before:bottom-0 before:w-px before:bg-white/10">
-                <!-- Item 1 -->
-                <div class="relative flex flex-col md:flex-row gap-8 items-start reveal">
-                  <div class="md:w-1/2 md:text-right md:pr-12 pt-2 pl-12 md:pl-0">
-                    <h3 class="text-xl font-bold text-white">Senior Backend Engineer</h3>
-                    <p class="text-accent font-mono text-sm mb-2">TechGiant Inc. (2021 - Present)</p>
-                    <p class="text-muted">Leading the core infrastructure team, managing systems that serve 5M+ daily active users.</p>
-                  </div>
-                  <div class="absolute left-[9px] md:left-1/2 md:-ml-[6px] w-3 h-3 rounded-full bg-accent mt-3"></div>
-                  <div class="md:w-1/2 md:pl-12 hidden md:block"></div>
-                </div>
-
-                <!-- Item 2 -->
-                <div class="relative flex flex-col md:flex-row gap-8 items-start reveal">
-                  <div class="md:w-1/2 md:text-right md:pr-12 hidden md:block"></div>
-                  <div class="absolute left-[9px] md:left-1/2 md:-ml-[6px] w-3 h-3 rounded-full bg-surface border border-accent mt-3"></div>
-                  <div class="md:w-1/2 md:pl-12 pt-2 pl-12 md:pl-0">
-                    <h3 class="text-xl font-bold text-white">Software Architect</h3>
-                    <p class="text-accent font-mono text-sm mb-2">StartupX (2018 - 2021)</p>
-                    <p class="text-muted">Designed the initial backend architecture that scaled from 0 to 1M users in 18 months.</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <!-- SOFT SKILLS -->
-          <section class="py-24 px-6">
-            <div class="max-w-[1280px] mx-auto">
-              <div class="flex flex-col md:flex-row gap-12 items-center reveal">
-                <div class="md:w-1/3">
-                  <h2 class="text-4xl font-display font-bold mb-4">BEYOND<br>THE CODE.</h2>
-                  <div class="h-1 w-20 bg-accent mb-8"></div>
-                </div>
-                <div class="md:w-2/3 grid grid-cols-1 sm:grid-cols-2 gap-8">
-                  <div class="p-6 border border-white/10 rounded-xl bg-surface/50">
-                    <i data-lucide="users" class="w-8 h-8 text-accent mb-4"></i>
-                    <h3 class="text-xl font-bold mb-2">Leadership & Mentoring</h3>
-                    <p class="text-muted">I enjoy mentoring junior engineers and leading system design workshops to foster a culture of technical excellence.</p>
-                  </div>
-                   <div class="p-6 border border-white/10 rounded-xl bg-surface/50">
-                    <i data-lucide="mic" class="w-8 h-8 text-accent mb-4"></i>
-                    <h3 class="text-xl font-bold mb-2">Communication</h3>
-                    <p class="text-muted">Translating complex technical concepts into business value for stakeholders is a key part of my role.</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-        `;
-        }
-
-        function renderContact() {
-            app.innerHTML = `
-          <section class="pt-40 pb-20 px-6">
-            <div class="max-w-[1280px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16">
-              <div class="reveal">
-                <h1 class="text-5xl md:text-7xl font-display font-bold mb-8">START A<br>CONVERSATION.</h1>
-                <p class="text-xl text-muted mb-12">
-                  Whether it's a new project or a technical challenge, I'm ready to listen.
-                </p>
-                
-                <div class="mb-12">
-                  <h3 class="text-white font-bold mb-6">Other Channels</h3>
-                  <div class="flex flex-col gap-4">
-                    <a href="mailto:${data.company.email}" class="flex items-center gap-3 text-muted hover:text-accent transition-colors">
-                      <div class="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center">
-                        <i data-lucide="mail" class="w-5 h-5"></i>
-                      </div>
-                      ${data.company.email}
-                    </a>
-                    <a href="https://linkedin.com" class="flex items-center gap-3 text-muted hover:text-accent transition-colors">
-                      <div class="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center">
-                        <i data-lucide="linkedin" class="w-5 h-5"></i>
-                      </div>
-                      LinkedIn Profile
-                    </a>
-                     <a href="https://github.com" class="flex items-center gap-3 text-muted hover:text-accent transition-colors">
-                      <div class="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center">
-                        <i data-lucide="github" class="w-5 h-5"></i>
-                      </div>
-                      GitHub Profile
-                    </a>
-                  </div>
-                </div>
-                
-                <div class="aspect-video w-full rounded-2xl overflow-hidden border border-white/10 grayscale invert">
-                  <iframe 
-                    src="https://www.google.com/maps?q=New+Delhi,+India&output=embed" 
-                    width="100%" 
-                    height="100%" 
-                    style="border:0;" 
-                    allowfullscreen="" 
-                    loading="lazy">
-                  </iframe>
-                </div>
-              </div>
-
-              <div class="bg-surface p-8 md:p-12 rounded-3xl border border-white/10 reveal">
-                <h3 class="text-2xl font-display font-bold mb-8">Send a Message</h3>
-                <form id="contact-form" class="space-y-6">
-                  <div>
-                    <label class="block text-sm font-medium text-muted mb-2">Full Name</label>
-                    <input type="text" name="name" required placeholder="John Doe" class="w-full bg-black border border-white/20 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-accent transition-colors">
-                  </div>
-                  <div>
-                    <label class="block text-sm font-medium text-muted mb-2">Email Address</label>
-                    <input type="email" name="email" required placeholder="john@example.com" class="w-full bg-black border border-white/20 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-accent transition-colors">
-                  </div>
-                  <div>
-                    <label class="block text-sm font-medium text-muted mb-2">Message</label>
-                    <textarea name="message" required rows="6" placeholder="Tell me about your project..." class="w-full bg-black border border-white/20 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-accent transition-colors"></textarea>
-                  </div>
-                  <button type="submit" class="w-full btn-pill justify-center text-lg">
-                    Send Message
-                  </button>
-                </form>
-              </div>
-            </div>
-          </section>
-        `;
-            attachFormHandler('contact-form');
-        }
-
-        function renderPrivacy() {
-            app.innerHTML = `
-          <section class="pt-40 pb-20 px-6 min-h-screen">
-            <div class="max-w-[800px] mx-auto">
-              <h1 class="text-4xl font-display font-bold mb-8">Privacy Policy</h1>
-              <div class="prose prose-invert prose-lg text-muted">
-                <p>Last updated: ${new Date().toLocaleDateString()}</p>
-                <p class="mt-8">This policy outlines how we handle your data. We only collect information necessary to respond to your inquiries.</p>
-                <p>When you submit a contact form, we receive your name, email, and message. We use this solely to reply to you. We do not sell or share your data with third parties.</p>
-                <p>We use cookies to improve website performance and analyze traffic. By using our website, you agree to our use of cookies.</p>
-              </div>
-            </div>
-          </section>
-        `;
-        }
-
-        function renderTerms() {
-            app.innerHTML = `
-          <section class="pt-40 pb-20 px-6 min-h-screen">
-            <div class="max-w-[800px] mx-auto">
-              <h1 class="text-4xl font-display font-bold mb-8">Terms of Service</h1>
-              <div class="prose prose-invert prose-lg text-muted">
-                <p>Last updated: ${new Date().toLocaleDateString()}</p>
-                <p class="mt-8">By using this website, you agree to the following terms. All content is the property of Karan Negi unless otherwise stated.</p>
-                <p>You may not reproduce, distribute, or create derivative works from any content on this site without explicit permission.</p>
-                <p>This website is provided "as is" without any warranties. We are not liable for any damages arising from your use of this site.</p>
-              </div>
-            </div>
-          </section>
-        `;
-        }
-
-        // ─── FORM HANDLER ──────────────────────────────────────────
-        function attachFormHandler(formId) {
-            const form = document.getElementById(formId);
-            if (!form) return;
-
-            form.addEventListener('submit', async e => {
-                e.preventDefault();
-                const btn = e.target.querySelector('button[type="submit"]');
-                const originalText = btn.innerHTML;
-
-                btn.disabled = true;
-                btn.textContent = 'Sending...';
-
-                try {
-                    if (typeof submitContactForm === 'function') {
-                        await submitContactForm(e.target);
-                    } else {
-                        // Simulation
-                        await new Promise(resolve => setTimeout(resolve, 1500));
-                        console.log('Form submitted (simulation)');
-                    }
-                    e.target.reset();
-                    btn.textContent = 'Message Sent!';
-                    btn.classList.add('bg-green-600', 'hover:bg-green-600');
-                } catch (err) {
-                    btn.textContent = 'Error sending';
-                    console.error(err);
+        // Contact form handler
+        const contactForm = document.getElementById('contact-form');
+        contactForm.addEventListener('submit', async e => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.textContent = 'Sending...';
+            try {
+                if (typeof submitContactForm === 'function') {
+                    await submitContactForm(e.target);
+                } else {
+                    await new Promise(resolve => setTimeout(resolve, 1500));
                 }
+                e.target.reset();
+                btn.textContent = 'Message Sent!';
+                btn.classList.add('bg-green-600', 'hover:bg-green-600');
+            } catch (err) {
+                btn.textContent = 'Error sending';
+                console.error(err);
+            }
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+                btn.classList.remove('bg-green-600', 'hover:bg-green-600');
+            }, 3000);
+        });
 
-                setTimeout(() => {
-                    btn.disabled = false;
-                    btn.innerHTML = originalText;
-                    btn.classList.remove('bg-green-600', 'hover:bg-green-600');
-                }, 3000);
-            });
-        }
-
-        // ─── INIT ─────────────────────────────────────────────────
-        render(location.pathname);
+        // Init
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+        if (window.lucide) window.lucide.createIcons();
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) window.lucide.createIcons();
+        });
     </script>
 
-
-    <!-- Built with Kite Badge -->
-    <div id="kite-badge">
-        <a href="https://kite.ai?utm_source=app_badge&utm_medium=referral&utm_campaign=built_with_kite&utm_content=6146e259-32c4-44b6-9c03-21bcdac14929"
-            target="_blank" rel="noopener noreferrer" aria-label="Built with Kite - Visit kite.ai">
-            <svg width="20" height="20" viewBox="0 0 36 37" fill="none" xmlns="http://www.w3.org/2000/svg"
-                aria-hidden="true">
-                <path
-                    d="M16.1125 18.2386C15.6193 21.2257 14.4972 25.1698 12.2792 27.3909C11.3745 28.2408 10.4019 28.5394 9.97343 28.5126C9.63405 28.4956 9.46773 28.1759 9.50531 27.9242C10.1515 21.0525 10.104 14.6401 9.50391 8.08358C9.48035 7.73678 9.76223 7.49486 10.0386 7.50524C10.3603 7.52263 14.5328 7.47187 14.7691 7.52558C15.1735 7.62557 15.1952 8.00533 15.1764 8.36322C15.1764 10.179 15.2876 10.1229 14.6808 10.7095C14.2793 11.111 13.6359 11.7487 13.2488 12.137C12.7351 12.5918 13.0289 12.9929 13.3749 13.5066C15.9881 17.4189 16.2488 17.5989 16.1126 18.2385L16.1125 18.2386Z"
-                    fill="#FF6D2D" />
-                <path
-                    d="M26.6218 27.7324C25.4614 25.8473 22.7405 21.5057 21.7432 19.8728C21.6479 19.7018 21.7022 19.5115 21.7908 19.4092C22.2219 18.8618 26.2758 13.6262 26.3072 13.5852C26.5926 13.1565 26.2916 12.6633 25.6711 12.735C21.3453 12.7375 21.3696 12.7111 21.1891 12.7859C20.8267 12.8964 20.8866 12.9081 18.172 16.9718C17.9134 17.3331 17.6607 17.7563 17.7632 18.217C18.3128 21.5444 20.1687 28.6515 24.4202 28.5119C24.9047 28.4999 25.821 28.5276 26.2159 28.5051C26.5385 28.472 26.7983 28.1217 26.6218 27.7324Z"
-                    fill="#FF6D2D" />
-            </svg>
-            <span>Built with Kite</span>
-        </a>
-        <button id="kite-badge-dismiss" type="button" aria-label="Dismiss badge">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                aria-hidden="true">
-                <path d="M18 6L6 18M6 6l12 12" />
-            </svg>
-        </button>
-    </div>
-    <script>
-        document.getElementById('kite-badge-dismiss').onclick = function () {
-            document.getElementById('kite-badge').style.display = 'none';
-        };
-    </script>
 </body>
 
 </html>
