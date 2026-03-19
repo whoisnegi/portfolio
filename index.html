@@ -123,6 +123,34 @@
         content="Karan Negi is a backend software engineer specializing in scalable systems, API design, and cloud infrastructure. Based in Delhi, India.">
     <title>Karan Negi | Backend Software Engineer</title>
 
+    <link rel="canonical" href="https://karannegi.in/" />
+    
+    <!-- ProfilePage Schema: Explicitly tells Google this is the definitive profile for Karan Negi -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "ProfilePage",
+      "mainEntity": {
+        "@type": "Person",
+        "name": "Karan Negi",
+        "alternateName": "whoisnegi",
+        "description": "Backend Software Engineer and Software Architect specialized in building scalable systems and cloud infrastructure. Based in Delhi, India.",
+        "image": "https://res.cloudinary.com/du5fldub3/image/upload/c_fill,w_1200,h_630,g_north/app/6146e259-32c4-44b6-9c03-21bcdac14929/screenshots/preview-image.png",
+        "jobTitle": "Backend Software Engineer",
+        "url": "https://karannegi.in",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Delhi",
+          "addressCountry": "India"
+        },
+        "sameAs": [
+          "https://www.linkedin.com/in/whoisnegi",
+          "https://github.com/whoisnegi"
+        ]
+      }
+    }
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -380,11 +408,15 @@
             </div>
 
             <div class="max-w-[1280px] w-full text-center relative z-10">
+                <div class="sr-only">
+                    <h1>Karan Negi Portfolio</h1>
+                    <p>Karan Negi is a Backend Software Engineer and Software Architect based in Delhi, India. Known as whoisnegi, he specializes in building scalable systems and cloud infrastructure.</p>
+                </div>
                 <div
                     class="inline-block mb-6 px-4 py-1 rounded-full border border-accent/50 text-accent text-sm font-medium tracking-wide reveal">
                     KARAN NEGI | SOFTWARE ARCHITECT
                 </div>
-                <h1 class="text-[clamp(2.2rem,8vw,7.5rem)] font-display font-bold leading-[0.9] tracking-tight mb-8 diagonal-hero mix-blend-screen reveal"
+                <h1 aria-hidden="true" class="text-[clamp(2.2rem,8vw,7.5rem)] font-display font-bold leading-[0.9] tracking-tight mb-8 diagonal-hero mix-blend-screen reveal"
                     style="transition-delay: 100ms">
                     ARCHITECTING<br>THE INVISIBLE.
                 </h1>
